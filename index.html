@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Satyr OS</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,sans-serif;background:#101218;color:#eee}
+#desk{width:100vw;height:100vh;background:radial-gradient(circle at 50% 20%,#343b56,#151722 60%,#090a0f);position:relative}
+#wall{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:72px;font-weight:800;letter-spacing:8px;color:#ffffff12;user-select:none}
+#bar{position:absolute;bottom:0;left:0;right:0;height:58px;background:#11131add;backdrop-filter:blur(18px);display:flex;align-items:center;padding:7px 12px;gap:8px;border-top:1px solid #ffffff18;z-index:9999}
+button,.icon{border:0;color:#eee;background:#ffffff0d;border-radius:10px;padding:9px 12px;cursor:pointer}button:hover,.icon:hover{background:#ffffff18}
+#start{font-weight:800;font-size:18px;background:#6c63ff}.clock{margin-left:auto;color:#bbb}
+.win{position:absolute;width:620px;height:400px;background:#191b24eF;border:1px solid #ffffff20;border-radius:14px;box-shadow:0 20px 70px #0009;overflow:hidden;resize:both;min-width:300px;min-height:180px}
+.title{height:42px;background:#222532;display:flex;align-items:center;padding:0 10px;cursor:move}.title b{flex:1}.close{padding:5px 10px;background:#ff4d5d}
+.body{height:calc(100% - 42px);overflow:auto;padding:16px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.card{background:#ffffff09;padding:18px;border-radius:12px}.big{font-size:38px}.terminal{background:#080a0d;color:#9dffb0;font-family:monospace;height:100%;padding:14px;white-space:pre-wrap}.termInput{width:100%;background:transparent;border:0;outline:0;color:#9dffb0;font:inherit}
+#menu{position:absolute;bottom:65px;left:12px;width:300px;background:#181a23f5;border:1px solid #ffffff1c;border-radius:16px;padding:14px;z-index:10000;box-shadow:0 20px 60px #000b}.menuitem{padding:12px;border-radius:10px;cursor:pointer}.menuitem:hover{background:#ffffff12}
+</style>
+</head>
+<body>
+<div id="desk"><div id="wall">SATYR</div><div id="bar">
+<button id="start" onclick="toggleMenu()">S</button><button onclick="openApp('Files')">📁 Files</button><button onclick="openApp('Terminal')">⌨ Terminal</button><button onclick="openApp('Satyr Store')">▦ Store</button><div class="clock" id="clock"></div>
+</div></div>
+<script>
+let z=10, n=0;
+function toggleMenu(){let m=document.getElementById('menu');if(m)m.remove();else{m=document.createElement('div');m.id='menu';m.innerHTML='<h2>Satyr</h2><div class="menuitem" onclick="openApp(\'Files\');toggleMenu()">📁 File Manager</div><div class="menuitem" onclick="openApp(\'Terminal\');toggleMenu()">⌨ Terminal</div><div class="menuitem" onclick="openApp(\'Satyr Store\');toggleMenu()">▦ Satyr Store</div><div class="menuitem" onclick="openApp(\'Settings\');toggleMenu()">⚙ Settings</div>';document.getElementById('desk').appendChild(m)}}
+function openApp(name){
+ let w=document.createElement('div');w.className='win';w.style.left=(100+n*25)%500+80+'px';w.style.top=(60+n*20)%260+45+'px';w.style.zIndex=++z;n++;
+ let content='';
+ if(name==='Files')content='<div class="grid"><div class="card big">📁</div><div class="card big">💾</div><div class="card big">🗑</div><div class="card">Home</div><div class="card">Documents</div><div class="card">Downloads</div></div>';
+ if(name==='Satyr Store')content='<h2>Satyr Store</h2><div class="grid"><div class="card"><b>Firefox</b><br><button onclick="alert(\'Installed\')">Install</button></div><div class="card"><b>VLC</b><br><button onclick="alert(\'Installed\')">Install</button></div><div class="card"><b>Wine</b><br><small>Built in Windows app compatibility</small><br><button onclick="alert(\'Wine is built into Satyr\')">Open</button></div></div>';
+ if(name==='Settings')content='<h2>Settings</h2><div class="card">Appearance<br><button onclick="document.getElementById(\'desk\').style.filter=\'brightness(1.2)\'">Brighter</button> <button onclick="document.getElementById(\'desk\').style.filter=\'brightness(.75)\'">Darker</button></div>';
+ if(name==='Terminal')content='<div class="terminal" id="term">Satyr Terminal v1.0<br>Wine compatibility layer: enabled<br>Type "help"<br><br>satyr@desktop:~$ <input class="termInput" autofocus></div>';
+ w.innerHTML='<div class="title"><b>'+name+'</b><button class="close">×</button></div><div class="body">'+content+'</div>';
+ document.getElementById('desk').appendChild(w);
+ w.querySelector('.close').onclick=()=>w.remove();
+ w.querySelector('.title').onmousedown=e=>drag(w,e);
+ let inp=w.querySelector('.termInput');if(inp)inp.onkeydown=e=>{if(e.key==='Enter'){let v=inp.value;let t=w.querySelector('#term');t.innerHTML+=v+'\\n';if(v==='help')t.innerHTML+='help  ls  wine  clear  neofetch\\n';else if(v==='neofetch')t.innerHTML+='SATYR OS\\nKDE Plasma inspired desktop\\nWine: built in\\n';else if(v==='wine')t.innerHTML+='Wine launcher ready\\n';else if(v==='clear')t.innerHTML='';t.innerHTML+='satyr@desktop:~$ <input class="termInput" autofocus>';let ni=t.querySelector('.termInput');ni.onkeydown=inp.onkeydown;ni.focus()}};
+}
+function drag(w,e){let x=e.clientX-w.offsetLeft,y=e.clientY-w.offsetTop;function mv(a){w.style.left=a.clientX-x+'px';w.style.top=a.clientY-y+'px';w.style.zIndex=++z}function up(){document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up)}document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up)}
+function tick(){document.getElementById('clock').textContent=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});};setInterval(tick,1000);tick();
+openApp('Satyr Store');
+</script>
+</body></html>
